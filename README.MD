@@ -1,60 +1,80 @@
-# Microsoft Fabric Cost Calculation for Brock Group (F64 SKU) - North Central US
+# **Microsoft Fabric Cost Calculation (F64 SKU)**
 
-## Overview
-This notebook calculates the estimated cost of running **Microsoft Fabric** for Brock Group, which operates on the **F64 SKU** in the **North Central US** region. The cost is based on **Capacity Unit (CU) seconds**, which is converted to **hours** for accurate billing.
+## **Overview**
+This document outlines the methodology for calculating the cost of running workloads in **Microsoft Fabric** under the **F64 SKU** tier. The pricing model is based on **Capacity Units (CUs)** and the region being used.
 
-## Cost Calculation Methodology
+## **Background**
+This cost analysis is conducted to help **Brock Group** optimize resource allocation and budget planning for Microsoft Fabric workloads. Stakeholders require a detailed breakdown to understand cost variations based on different execution frequencies and ensure that workloads are running efficiently without unnecessary expenses.
 
-### Key Parameters:
-- **SKU Tier**: **F64**
-- **Region**: **North Central US**
-- **Pay-as-you-go Cost per Hour**: **$11.52/hour**
-- **Reserved Capacity Cost per Hour**: **$6.853/hour**
-- **CU Duration Column**: **"CU s" (Capacity Unit seconds)**
-- **Conversion to Hours**: **CU s ÷ 3600**  
+## **Cost Calculation Approach**
+The cost for Microsoft Fabric is determined based on the **selected SKU tier**, the **hourly rate per Capacity Unit (CU)**, and the **frequency of execution**. The updated cost estimation formula considers different execution schedules.
 
-### Formulas:
-For each row in the dataset:
-
-#### **Convert CU Seconds to Hours**
-\[
-\text{CU Hours} = \frac{\text{CU s}}{3600}
-\]
-
-#### **Compute Costs**
-\[
-\text{Cost (Pay-as-you-go)} = \frac{\text{CU s}}{3600} \times 11.52
-\]
+### **Key Formula**
+For each execution run:
 
 \[
-\text{Cost (Reserved Capacity)} = \frac{\text{CU s}}{3600} \times 6.853
+\text{Cost per Run} = \text{Capacity Units Used per Run} \times \text{Hourly Rate per CU}
 \]
 
-## Example Calculation:
-If a given row has **CU s = 7200**, the calculations would be:
+The total cost for different periods is calculated based on the number of runs.
 
+## **Three Cost Calculation Models**
+We have implemented three distinct cost models to analyze the execution runs:
+
+### **1. Standard Daily Runs (4 Runs per Day)**
+- The system executes **4 runs per day** consistently.
+- The total cost is calculated for **daily, monthly, and yearly usage**.
+
+#### **Final Formula**
 \[
-\text{CU Hours} = \frac{7200}{3600} = 2 \text{ hours}
+\text{Total Monthly Cost} = 4 \times 24 \times 30 \times \text{Hourly Rate per CU}
 \]
-
 \[
-\text{Cost (Pay-as-you-go)} = 2 \times 11.52 = \mathbf{\$23.04}
+\text{Total Yearly Cost} = 4 \times 24 \times 365 \times \text{Hourly Rate per CU}
 \]
 
+### **2. Hourly Runs Daily (24 Runs per Day)**
+- The system executes **1 run per hour**, leading to **24 runs per day**.
+- The total cost reflects the increased frequency of execution.
+
+#### **Final Formula**
 \[
-\text{Cost (Reserved Capacity)} = 2 \times 6.853 = \mathbf{\$13.71}
+\text{Total Monthly Cost} = 24 \times 24 \times 30 \times \text{Hourly Rate per CU}
+\]
+\[
+\text{Total Yearly Cost} = 24 \times 24 \times 365 \times \text{Hourly Rate per CU}
 \]
 
-## Additional Considerations:
-- The **cost is calculated per row**, meaning each execution has an independent cost.
-- **Reserved capacity offers a significant discount (~40.2%)** compared to pay-as-you-go.
-- **Optimizing CU usage** can lead to cost savings by reducing execution time or leveraging auto-scaling.
+### **3. Hybrid Runs (4 Runs Daily & Hourly Runs for Month-End Period)**
+- The system executes **4 runs per day** normally.
+- During the **last 7 days of each month**, the execution frequency increases to **hourly runs (24 runs per day)**.
+- The cost estimation accounts for this hybrid execution pattern.
 
-## References:
-- [Microsoft Fabric Pricing - North Central US](https://azure.microsoft.com/en-us/pricing/details/microsoft-fabric/)
-- [Fabric Capacity Units and Billing](https://learn.microsoft.com/en-us/fabric/capacity/capacity-units)
+#### **Final Formula**
+For the first **23 days** of the month:
+\[
+\text{Cost}_{\text{standard}} = 4 \times 24 \times 23 \times \text{Hourly Rate per CU}
+\]
 
-## Next Steps:
-1. **Apply this formula to each row** in the dataset to compute costs dynamically.
-2. **Analyze cost trends** to determine if reserved capacity is more cost-effective.
-3. **Implement optimizations** to minimize unnecessary CU usage.
+For the last **7 days** of the month:
+\[
+\text{Cost}_{\text{month-end}} = 24 \times 24 \times 7 \times \text{Hourly Rate per CU}
+\]
+
+Total Monthly Cost:
+\[
+\text{Total Monthly Cost} = \text{Cost}_{\text{standard}} + \text{Cost}_{\text{month-end}}
+\]
+
+Total Yearly Cost:
+\[
+\text{Total Yearly Cost} = 12 \times \text{Total Monthly Cost}
+\]
+
+## **Reference Documentation**
+For the latest pricing and detailed information, refer to the official Microsoft Fabric pricing documentation:
+
+- [Microsoft Fabric Pricing](https://azure.microsoft.com/en-us/pricing/details/microsoft-fabric/)
+- [Microsoft Fabric Capacity Units](https://learn.microsoft.com/en-us/fabric/capacity-units)
+
+This document will be updated as Microsoft releases new pricing updates or modifies its cost structure.
